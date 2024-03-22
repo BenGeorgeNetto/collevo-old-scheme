@@ -137,6 +137,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  cunning_document_scanner:
+    dependency: "direct main"
+    description:
+      name: cunning_document_scanner
+      sha256: a560e5c00a3965e427612ecead4ff2e1ca2f2e95819e28013467bfe0a3900a91
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3"
   equatable:
     dependency: "direct main"
     description:
