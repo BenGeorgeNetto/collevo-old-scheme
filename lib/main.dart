@@ -10,8 +10,11 @@ import 'package:collevo/services/updation/version_check_service.dart';
 import 'package:collevo/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_strategy/url_strategy.dart';
+
+import 'colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +42,12 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: darkColorScheme.scrim,
+      statusBarIconBrightness: Brightness.light,
+      // systemNavigationBarColor: darkColorScheme.scrim,
+      // systemNavigationBarIconBrightness: Brightness.light,
+    ));
     return MultiBlocProvider(
       providers: [
         BlocProvider<BottomNavBarCubit>(
