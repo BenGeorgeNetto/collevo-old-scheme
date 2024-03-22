@@ -1,8 +1,7 @@
-// ignore_for_file: unused_local_variable
-
 import 'dart:async';
 import 'dart:io';
-import 'package:edge_detection/edge_detection.dart';
+import 'package:collevo/colors.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,44 +20,20 @@ class ImageService {
     }
 
     if (!isCameraGranted) {
+      setImagePath(null);
       return;
     }
 
-    String? imagePath = join((await getApplicationSupportDirectory()).path,
-        "${(DateTime.now().millisecondsSinceEpoch / 1000).round()}.jpeg");
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.camera);
 
-    try {
-      bool success = await EdgeDetection.detectEdge(
-        imagePath,
-        canUseGallery: true,
-        androidScanTitle: 'Scanning',
-        androidCropTitle: 'Crop',
-        androidCropBlackWhiteTitle: 'Black White',
-        androidCropReset: 'Reset',
-      );
-      // print("success: $success");
-    } catch (e) {
-      // print(e);
+    if (pickedFile == null) {
+      setImagePath(null);
+      return;
     }
 
-    if (!await File(imagePath).exists()) {
-      imagePath = null;
-    }
-
-    final fileSize = await File(imagePath!).length();
-    const threshold = 2048 * 2048;
-    final quality = fileSize > threshold ? 50 : 80;
-
-    final compressedImage = await FlutterImageCompress.compressAndGetFile(
-      imagePath,
-      imagePath.replaceFirst('.jpeg', '_compressed.jpeg'),
-      quality: quality,
-    );
-
-    imagePath = compressedImage?.path;
-
-    ImageService.imagePath = imagePath;
-    setImagePath(imagePath);
+    await _cropAndCompressImage(pickedFile.path, setImagePath);
   }
 
   static Future<void> getImageFromGallery(
@@ -72,23 +47,65 @@ class ImageService {
       return;
     }
 
-    String? imagePath = pickedFile.path;
+    await _cropAndCompressImage(pickedFile.path, setImagePathCallback);
+  }
 
-    final fileSize = await File(imagePath).length();
-    const threshold = 2048 * 2048;
-    final quality = fileSize > threshold ? 50 : 80;
+  static Future<void> _cropAndCompressImage(
+      String imagePath, void Function(String?) setImagePath) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: imagePath,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio16x9,
+      ],
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: darkColorScheme.primary,
+          toolbarWidgetColor: darkColorScheme.onPrimary,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false,
+        ),
+        IOSUiSettings(
+          title: 'Crop Image',
+        ),
+      ],
+    );
 
-    final compressedImagePath =
-        '${imagePath.substring(0, imagePath.lastIndexOf('.'))}_compressed.jpeg';
+    if (croppedFile == null) {
+      setImagePath(null);
+      return;
+    }
 
+    // Check the file size and decide the compression quality
+    final fileSize = await File(croppedFile.path).length();
+    int quality;
+    if (fileSize <= 1024 * 1024) {
+      // for images less than 1MB
+      quality = 90;
+    } else if (fileSize <= 2 * 1024 * 1024) {
+      // for images less than 2MB
+      quality = 80;
+    } else {
+      // for images larger than 2MB
+      quality = 70;
+    }
+
+    // Compress the cropped image dynamically based on its size
+    final dir = await getTemporaryDirectory();
+    final targetPath =
+        join(dir.path, "${DateTime.now().millisecondsSinceEpoch}.jpeg");
     final compressedImage = await FlutterImageCompress.compressAndGetFile(
-      imagePath,
-      compressedImagePath,
+      croppedFile.path,
+      targetPath,
       quality: quality,
     );
 
-    imagePath = compressedImage?.path;
-    ImageService.imagePath = imagePath;
-    setImagePathCallback(imagePath);
+    final String? finalImagePath = compressedImage?.path;
+    imagePath = finalImagePath!;
+    setImagePath(finalImagePath);
   }
 }

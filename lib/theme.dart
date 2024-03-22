@@ -5,10 +5,9 @@ import 'package:collevo/colors.dart';
 class CustomTheme {
   static ThemeData getThemeData() {
     return ThemeData(
-      // primaryColor: CustomColors.manga,
       appBarTheme: AppBarTheme(
-        color: darkColorScheme.scrim,
-        // backgroundColor: Colors.transparent,
+        backgroundColor: darkColorScheme.scrim,
+        surfaceTintColor: darkColorScheme.scrim,
         // elevation: 0,
         elevation: 2,
         centerTitle: true,
@@ -45,7 +44,8 @@ class CustomTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          // backgroundColor: CustomColors.buttonBlue,
+          backgroundColor: darkColorScheme.primary,
+          foregroundColor: darkColorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.2),
