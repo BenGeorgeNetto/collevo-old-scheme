@@ -2,6 +2,7 @@ import 'package:collevo/enums/status_enum.dart';
 import 'package:collevo/models/request.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collevo/services/preferences/preferences_service.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class RequestsFetchService {
   Future<List<Request>> fetchMyRequestsByStatus(Status status) async {
@@ -47,7 +48,15 @@ class RequestsFetchService {
       }).toList();
 
       return myRequests;
-    } catch (e) {
+    } catch (error, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'fetchMyRequestsByStatus failed to fetch requests',
+        information: [
+          'status: ${status.index}',
+        ],
+      );
       return [];
     }
   }

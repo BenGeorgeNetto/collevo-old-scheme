@@ -5,6 +5,7 @@ import 'package:collevo/services/auth/auth_service.dart';
 import 'package:collevo/services/auth/auth_user.dart';
 import 'package:collevo/services/preferences/preferences_service.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart' show immutable;
 
 part 'auth_event.dart';
@@ -43,7 +44,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await provider.sendPasswordReset(toEmail: email);
         didSendEmail = true;
         exception = null;
-      } on Exception catch (e) {
+      } on Exception catch (e, s) {
+        await FirebaseCrashlytics.instance.recordError(
+          e,
+          s,
+          reason: 'AuthBloc failed to send password reset email',
+          information: ['email: $email'],
+        );
         didSendEmail = false;
         exception = e;
       }
@@ -73,7 +80,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await updateDocumentsWithEmail(email);
 
         emit(const AuthStateNeedsVerification(isLoading: false));
-      } on Exception catch (e) {
+      } on Exception catch (e, s) {
+        await FirebaseCrashlytics.instance.recordError(
+          e,
+          s,
+          reason: 'AuthBloc failed to register user',
+          information: ['email: $email'],
+        );
         emit(AuthStateRegistering(
           exception: e,
           isLoading: false,
@@ -140,7 +153,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             isLoading: false,
           ));
         }
-      } on Exception catch (e) {
+      } on Exception catch (e, s) {
+        await FirebaseCrashlytics.instance.recordError(
+          e,
+          s,
+          reason: 'AuthBloc failed to log in user',
+          information: ['email: $email'],
+        );
         emit(
           AuthStateLoggedOut(
             exception: e,
@@ -160,7 +179,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             isLoading: false,
           ),
         );
-      } on Exception catch (e) {
+      } on Exception catch (e, s) {
+        await FirebaseCrashlytics.instance.recordError(
+          e,
+          s,
+          reason: 'AuthBloc failed to log out user',
+        );
         emit(
           AuthStateLoggedOut(
             exception: e,
@@ -179,7 +203,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           .get();
       final whitelist = snapshot.data()?['emails'] ?? [];
       return whitelist.contains(email);
-    } catch (e) {
+    } catch (e, s) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        s,
+        reason: 'isEmailWhitelisted failed to fetch whitelist',
+        information: ['email: $email'],
+      );
       return false;
     }
   }
@@ -208,7 +238,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final DocumentReference docRef = doc.reference;
         await docRef.update({'uid': uid});
       }
-    } catch (e) {
+    } catch (e, s) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        s,
+        reason: 'Student UID linking with Student Document failed',
+        information: [
+          'updateDocumentsWithEmail() in AuthBloc',
+          'email: $email'
+        ],
+      );
       // print('An error occurred while updating the documents: $e');
     }
   }

@@ -9,17 +9,25 @@ import 'package:collevo/services/auth/firebase_auth_provider.dart';
 import 'package:collevo/services/updation/version_check_service.dart';
 import 'package:collevo/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_strategy/url_strategy.dart';
-
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   final versionCheckService = VersionCheckService(FirebaseFirestore.instance);
   runApp(MyApp(versionCheckService: versionCheckService));
 }

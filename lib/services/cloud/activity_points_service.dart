@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collevo/data/activity_assigned_points.dart';
 import 'package:collevo/data/activity_max_points.dart';
 import 'package:collevo/services/preferences/preferences_service.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class ActivityPointsService {
   Map<String, int> activityPoints = {};
@@ -34,7 +35,16 @@ class ActivityPointsService {
         // print('Document does not exist on the database');
         return {};
       }
-    } catch (e) {
+    } catch (error, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'ActivityPointsService failed to get activityPoints',
+        information: [
+          'email: $email',
+          'batch: $batch',
+        ],
+      );
       // print('Error getting activityPoints: $e');
       return {};
     }
@@ -64,7 +74,16 @@ class ActivityPointsService {
         // print('Document does not exist on the database');
         return null;
       }
-    } catch (e) {
+    } catch (error, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'ActivityPointsService failed to get totalActivityPoints',
+        information: [
+          'email: $email',
+          'batch: $batch',
+        ],
+      );
       return null;
     }
   }

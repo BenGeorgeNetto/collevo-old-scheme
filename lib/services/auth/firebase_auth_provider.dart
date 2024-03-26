@@ -5,6 +5,7 @@ import 'package:collevo/services/auth/auth_user.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart'
     show FirebaseAuth, FirebaseAuthException;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class FirebaseAuthProvider implements AuthProvider {
   @override
@@ -42,7 +43,13 @@ class FirebaseAuthProvider implements AuthProvider {
       } else {
         throw GenericAuthException();
       }
-    } catch (_) {
+    } catch (e, s) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        s,
+        reason: 'Failed to create user',
+        information: ['email: $email'],
+      );
       throw GenericAuthException();
     }
   }
@@ -73,15 +80,39 @@ class FirebaseAuthProvider implements AuthProvider {
       } else {
         throw UserNotLoggedInAuthException();
       }
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e, s) {
       if (e.code == 'user-not-found') {
+        await FirebaseCrashlytics.instance.recordError(
+          e,
+          s,
+          reason: 'User not found',
+          information: ['email: $email'],
+        );
         throw UserNotFoundAuthException();
       } else if (e.code == 'wrong-password') {
+        await FirebaseCrashlytics.instance.recordError(
+          e,
+          s,
+          reason: 'Wrong password',
+          information: ['email: $email'],
+        );
         throw WrongPasswordAuthException();
       } else {
+        await FirebaseCrashlytics.instance.recordError(
+          e,
+          s,
+          reason: 'Failed to log in',
+          information: ['email: $email'],
+        );
         throw GenericAuthException();
       }
-    } catch (_) {
+    } catch (e, s) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        s,
+        reason: 'Failed to log in',
+        information: ['email: $email'],
+      );
       throw GenericAuthException();
     }
   }
@@ -119,7 +150,13 @@ class FirebaseAuthProvider implements AuthProvider {
         default:
           throw GenericAuthException();
       }
-    } catch (_) {
+    } catch (e, s) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        s,
+        reason: 'Failed to send password reset email',
+        information: ['email: $toEmail'],
+      );
       throw GenericAuthException();
     }
   }

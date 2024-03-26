@@ -9,6 +9,7 @@ import 'package:collevo/presentation/main/home_screen.dart';
 import 'package:collevo/services/auth/bloc/auth_bloc.dart';
 import 'package:collevo/services/app_update/bloc/app_update_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class Landing extends StatelessWidget {
   const Landing({Key? key}) : super(key: key);
@@ -139,8 +140,16 @@ class Landing extends StatelessWidget {
       )) {
         // print('Could not launch $url');
       }
-    } catch (e) {
-      // print('An error occurred: $e');
+    } catch (error, stackTrace) {
+      await FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: 'Could not launch update URL',
+        information: [
+          '_launchUpdateUrl() in landing.dart',
+          'Trying to launch the google drive for app apk',
+        ],
+      );
     }
   }
 }

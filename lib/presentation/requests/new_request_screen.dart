@@ -17,6 +17,7 @@ import 'package:collevo/utilities/snackbars/upload_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:collevo/data/activities_lists.dart';
 import 'package:collevo/services/image/image_service.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class NewRequest extends StatefulWidget {
   const NewRequest({Key? key}) : super(key: key);
@@ -449,8 +450,20 @@ class _NewRequestState extends State<NewRequest> {
                                           () {
                                         Navigator.pop(context);
                                       });
-                                    } catch (e) {
+                                    } catch (error, stackTrace) {
                                       // print('Error: $e');
+                                      await FirebaseCrashlytics.instance
+                                          .recordError(
+                                        error,
+                                        stackTrace,
+                                        reason: 'Error uploading new request',
+                                        information: [
+                                          'User: $uid',
+                                          'Batch: $batch',
+                                          'Activity ID: $_activityId',
+                                          'Possible slow internet connection'
+                                        ],
+                                      );
                                       showUploadFailedSnackbar(context);
                                     }
                                     LoadingScreen().hide();
