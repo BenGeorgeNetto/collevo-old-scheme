@@ -12,7 +12,9 @@ class Request {
   final String activityLevel;
   final String batch; // batch of the student
   final int yearActivityDoneIn;
-  String? optionalMessage;
+  String? optionalMessage; // optional message from the student
+  String? optionalRemark; // optional remark from the teacher
+  int? awardedPoints; // actual points teacher gave to student
 
   Request({
     required this.requestId,
@@ -27,6 +29,8 @@ class Request {
     required this.batch,
     required this.yearActivityDoneIn,
     this.optionalMessage,
+    this.optionalRemark,
+    this.awardedPoints,
   });
 
   Map<String, dynamic> toMap() {
@@ -43,10 +47,13 @@ class Request {
       'batch': batch,
       'year_activity_done_in': yearActivityDoneIn,
       'optional_message': optionalMessage,
+      'optional_remark': optionalRemark,
+      'awarded_points': awardedPoints,
     };
   }
 
   factory Request.fromMap(Map<String, dynamic> map) {
+    print(map);
     return Request(
       requestId: map['request_id'] as String,
       activityId: map['activity_id'] as String,
@@ -60,6 +67,8 @@ class Request {
       batch: map['batch'] as String,
       yearActivityDoneIn: map['year_activity_done_in'] as int,
       optionalMessage: map['optional_message'] as String?,
+      optionalRemark: map['optional_remark'] as String? ?? '',
+      awardedPoints: map['awarded_points'] as int? ?? -1,
     );
   }
 }

@@ -52,48 +52,50 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         bottomNavigationBar: const BottomNavBar(),
-        body: Column(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 64.0, 16.0, 32.0),
-                child: Column(children: [
-                  Text(
-                    '$name',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  // Text(
-                  //   '$email',
-                  //   style: Theme.of(context).textTheme.bodySmall,
-                  //   textAlign: TextAlign.center,
-                  // ),
-                  Text(
-                    "$sid",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ]),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 64.0, 16.0, 32.0),
+                  child: Column(children: [
+                    Text(
+                      '$name',
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    // Text(
+                    //   '$email',
+                    //   style: Theme.of(context).textTheme.bodySmall,
+                    //   textAlign: TextAlign.center,
+                    // ),
+                    Text(
+                      "$sid",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ]),
+                ),
               ),
-            ),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                HomeCard(
-                  cardText: "Request Activity Points",
-                  routeName: '/new_request',
-                ),
-                HomeCard(
-                  cardText: "User Stats",
-                  routeName: '/stats',
-                ),
-              ],
-            ),
-          ],
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  HomeCard(
+                    cardText: "Request Activity Points",
+                    routeName: '/new_request',
+                  ),
+                  HomeCard(
+                    cardText: "User Stats",
+                    routeName: '/stats',
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

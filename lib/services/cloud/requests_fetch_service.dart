@@ -8,41 +8,56 @@ class RequestsFetchService {
     try {
       final String? currentUserUID = await PreferencesService().getUid();
       final String? batch = await PreferencesService().getBatch();
+      print("Calling fetchMyRequestsByStatus");
+      print("currentUserUID: $currentUserUID");
+      print("batch: $batch");
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection("students")
           .doc(batch)
           .collection('requests')
-          .where(
-            'created_by',
-            isEqualTo: currentUserUID,
-          )
-          .where(
-            'status',
-            isEqualTo: status.index,
-          )
+          .where('created_by', isEqualTo: currentUserUID)
+          .where('status', isEqualTo: status.index)
           .get();
+      print("QuerySnapshot: $querySnapshot");
+      print(
+          "QuerySnapshot documents: ${querySnapshot.docs.map((doc) => doc.data()).toList()}");
 
       final List<Request> myRequests = querySnapshot.docs.map((doc) {
+        // Safely accessing each field with fallback values for potentially missing fields
+        final data = doc.data();
+        final Timestamp createdAtTimestamp = data['created_at'];
+        final DateTime createdAtDate = createdAtTimestamp.toDate();
+
         return Request(
-          requestId: doc['request_id'],
-          activityId: doc['activity_id'],
-          createdBy: doc['created_by'],
-          createdAt: doc['created_at'].toDate(),
-          imageUrl: doc['image_url'],
-          status: Status.values[doc['status']],
-          activityType: doc['activity_type'],
-          activity: doc['activity'],
-          activityLevel: doc['activity_level'],
-          batch: doc['batch'],
-          yearActivityDoneIn: doc['year_activity_done_in'],
-          optionalMessage: doc['optional_message'],
+          requestId: data['request_id'],
+          activityId: data['activity_id'],
+          createdBy: data['created_by'],
+          createdAt: createdAtDate,
+          imageUrl: data['image_url'],
+          status: Status.values[data['status']],
+          activityType: data['activity_type'],
+          activity: data['activity'],
+          activityLevel: data['activity_level'],
+          batch: data['batch'],
+          yearActivityDoneIn: data['year_activity_done_in'],
+          optionalMessage: data.containsKey('optional_message')
+              ? data['optional_message']
+              : '',
+          awardedPoints:
+              data.containsKey('awarded_points') ? data['awarded_points'] : -1,
+          optionalRemark: data.containsKey('optional_remark')
+              ? data['optional_remark']
+              : '',
         );
       }).toList();
 
+      print('Fetched requests: $myRequests');
+      print('$currentUserUID $batch $status');
+
       return myRequests;
     } catch (e) {
-      // print('Error fetching requests: $e');
+      print('Error fetching requests: $e');
       return [];
     }
   }
