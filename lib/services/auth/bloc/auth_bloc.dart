@@ -204,12 +204,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       final List<DocumentSnapshot> documents = querySnapshot.docs;
       for (final DocumentSnapshot doc in documents) {
-        print('Updating document: ${doc.reference.id}');
+        // print('Updating document: ${doc.reference.id}');
         final DocumentReference docRef = doc.reference;
         await docRef.update({'uid': uid});
       }
     } catch (e) {
-      print('An error occurred while updating the documents: $e');
+      // print('An error occurred while updating the documents: $e');
     }
   }
 }

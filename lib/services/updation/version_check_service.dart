@@ -7,7 +7,7 @@ class VersionCheckService {
   VersionCheckService(this.firestore);
 
   Future<UpdateCheckResult> isUpdateRequired() async {
-    print("Checking for updates in version check service");
+    // print("Checking for updates in version check service");
     final packageInfo = await PackageInfo.fromPlatform();
     final currentVersion = packageInfo.version;
 

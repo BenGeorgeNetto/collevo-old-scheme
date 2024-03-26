@@ -8,9 +8,6 @@ class RequestsFetchService {
     try {
       final String? currentUserUID = await PreferencesService().getUid();
       final String? batch = await PreferencesService().getBatch();
-      print("Calling fetchMyRequestsByStatus");
-      print("currentUserUID: $currentUserUID");
-      print("batch: $batch");
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection("students")
@@ -19,9 +16,6 @@ class RequestsFetchService {
           .where('created_by', isEqualTo: currentUserUID)
           .where('status', isEqualTo: status.index)
           .get();
-      print("QuerySnapshot: $querySnapshot");
-      print(
-          "QuerySnapshot documents: ${querySnapshot.docs.map((doc) => doc.data()).toList()}");
 
       final List<Request> myRequests = querySnapshot.docs.map((doc) {
         // Safely accessing each field with fallback values for potentially missing fields
@@ -52,12 +46,8 @@ class RequestsFetchService {
         );
       }).toList();
 
-      print('Fetched requests: $myRequests');
-      print('$currentUserUID $batch $status');
-
       return myRequests;
     } catch (e) {
-      print('Error fetching requests: $e');
       return [];
     }
   }
